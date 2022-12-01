@@ -1,0 +1,27 @@
+cabal-version:      3.0
+name:               aoc2022
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            MIT
+license-file:       LICENSE
+author:             Ian Burzynski
+maintainer:         23251244+iburzynski@users.noreply.github.com
+-- copyright:
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+executable aoc2022
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:    D01
+    -- other-extensions:
+    build-depends:    base ^>=4.15.1.0
+                    , containers
+                    , directory
+    hs-source-dirs:   app, src
+    default-language: Haskell2010
