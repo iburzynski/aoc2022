@@ -1,6 +1,6 @@
 module Main where
 
-import D01
+import D01 ( d01_1, d01_2 )
 
 import qualified Data.IntMap.Strict as M
 import Data.IntMap.Strict (IntMap)
@@ -8,7 +8,6 @@ import System.Directory (doesFileExist)
 import System.Environment (getArgs)
 import Text.Read (readMaybe)
 
-type Day = Int
 type Solution = [String] -> String
 
 solutions :: IntMap [Solution]
