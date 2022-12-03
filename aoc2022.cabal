@@ -16,12 +16,20 @@ common warnings
     ghc-options: -Wall
 
 executable aoc2022
-    import:           warnings
-    main-is:          Main.hs
-    other-modules:    D01
+    import:               warnings
+    main-is:              Main.hs
+    other-modules:        D01
+                        , D02
+                        , Utils
+    default-extensions:   OverloadedStrings
     -- other-extensions:
-    build-depends:    base ^>=4.15.1.0
-                    , containers
-                    , directory
+    build-depends:        base ^>=4.15.1.0
+                        , containers
+                        , directory
+                        , megaparsec
+                        , relude
+    mixins:               base hiding (Prelude)
+                        , relude (Relude as Prelude)
+                        , relude
     hs-source-dirs:   app, src
     default-language: Haskell2010

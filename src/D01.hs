@@ -1,22 +1,20 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module D01 where
 
-import Data.List (insertBy)
+import Utils ( Parser, prepAnswers )
 
-type CurrentTotal = Int
+import Data.List ( insertBy )
+import Text.Megaparsec ( eof, sepEndBy )
+import Text.Megaparsec.Char ( newline )
+import qualified Text.Megaparsec.Char.Lexer as L
 
-d01_1 :: [String] -> String
-d01_1 = show . worker max 0
+elfSnacksParser :: Parser [[Int]]
+elfSnacksParser = sepEndBy (many (L.decimal <* newline)) newline <* eof
 
-d01_2 :: [String] -> String
-d01_2 = show . sum . worker max3 []
- where max3 n = take 3 . insertBy (flip compare) n
+d01 :: FilePath -> Text -> (String, String)
+d01 = prepAnswers elfSnacksParser d01_1 d01_2
 
-worker :: forall acc . (CurrentTotal -> acc -> acc) -> acc -> [String] -> acc
-worker calc i = uncurry calc . foldr reducer (0, i)
--- calc must be applied to final results of fold so the final group's total is accounted for
-  where
-    reducer :: String -> (CurrentTotal, acc) -> (CurrentTotal, acc)
-    -- reset current total and calculate new accumulator or increase current total
-    reducer str (c, a) = if null str then (0, calc c a) else (c + read str, a)
+d01_1 :: [[Int]] -> String
+d01_1 = show . foldr (\elf maxCals -> max maxCals (sum elf)) 0
+
+d01_2 :: [[Int]] -> String
+d01_2 = show . sum . foldr (\elf top3 -> take 3 $ insertBy (flip compare) (sum elf) top3) []

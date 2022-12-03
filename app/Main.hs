@@ -1,28 +1,30 @@
+
 module Main where
 
-import D01 ( d01_1, d01_2 )
+import D01 ( d01 )
+import D02 ( d02 )
 
-import qualified Data.IntMap.Strict as M
-import Data.IntMap.Strict (IntMap)
 import System.Directory (doesFileExist)
-import System.Environment (getArgs)
-import Text.Read (readMaybe)
+import qualified Data.IntMap.Strict as M
 
-type Solution = [String] -> String
+type Solution = FilePath -> Text -> (String, String)
 
-solutions :: IntMap [Solution]
-solutions = M.fromList $ zip [1 ..] [
-    [d01_1, d01_2]
+solutions :: IntMap Solution
+solutions = M.fromList $ zip [1 ..]
+  [ d01
+  , d02
   ]
 
 runDay :: String -> IO ()
 runDay d = do
-  let p     = concat ["./input/d", if length d < 2 then '0' : d else d, ".txt"]
-      mSols = sequenceA $ readMaybe d >>= flip M.lookup solutions
+  let d'   = if length d < 2 then '0' : d else d
+      p    = concat ["./input/d", d', ".txt"]
+      mSol = readMaybe d >>= flip M.lookup solutions
   b      <- doesFileExist p
-  mInput <- if b then Just . lines <$> readFile p else pure Nothing
-  case traverse (<*> mInput) mSols of
-    Just os -> mapM_ putStrLn $ zipWith (\i s -> concat ["Part ", show i, ": ", s]) [1 :: Int ..] os
+  mInput <- if b then Just . decodeUtf8 <$> readFileBS p else pure Nothing
+  putStrLn $ concat ["*** Day ", d', " ***\n"]
+  case mSol <*> pure p <*> mInput of
+    Just as -> bitraverse_ (putStrLn . ("Part 1: " ++)) (putStrLn . ("Part 2: " ++)) as
     Nothing -> putStrLn "Challenge not found!"
 
 main :: IO ()
