@@ -20,6 +20,7 @@ executable aoc2022
     main-is:              Main.hs
     other-modules:        D01
                         , D02
+                        , D03
                         , Utils
     default-extensions:   OverloadedStrings
     -- other-extensions:
@@ -28,6 +29,7 @@ executable aoc2022
                         , directory
                         , megaparsec
                         , relude
+                        , split
     mixins:               base hiding (Prelude)
                         , relude (Relude as Prelude)
                         , relude
