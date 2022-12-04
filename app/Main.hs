@@ -4,6 +4,7 @@ module Main where
 import D01 ( d01 )
 import D02 ( d02 )
 import D03 ( d03 )
+import D04 ( d04 )
 
 import System.Directory (doesFileExist)
 import qualified Data.IntMap.Strict as M
@@ -15,6 +16,7 @@ solutions = M.fromList $ zip [1 ..]
   [ d01
   , d02
   , d03
+  , d04
   ]
 
 runDay :: String -> IO ()

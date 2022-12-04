@@ -21,6 +21,7 @@ executable aoc2022
     other-modules:        D01
                         , D02
                         , D03
+                        , D04
                         , Utils
     default-extensions:   OverloadedStrings
     -- other-extensions:
