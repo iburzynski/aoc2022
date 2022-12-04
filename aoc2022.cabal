@@ -25,7 +25,7 @@ executable aoc2022
                         , Utils
     default-extensions:   OverloadedStrings
     -- other-extensions:
-    build-depends:        base ^>=4.15.1.0
+    build-depends:        base ^>=4.16.1.0
                         , containers
                         , directory
                         , megaparsec
