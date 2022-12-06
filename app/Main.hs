@@ -6,6 +6,7 @@ import D02 ( d02 )
 import D03 ( d03 )
 import D04 ( d04 )
 import D05 ( d05 )
+import D06 ( d06 )
 
 import System.Directory (doesFileExist)
 import qualified Data.IntMap.Strict as M
@@ -19,6 +20,7 @@ solutions = M.fromList $ zip [1 ..]
   , d03
   , d04
   , d05
+  , d06
   ]
 
 runDay :: String -> IO ()

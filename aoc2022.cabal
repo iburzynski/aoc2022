@@ -23,6 +23,7 @@ executable aoc2022
                         , D03
                         , D04
                         , D05
+                        , D06
                         , Utils
     default-extensions:   OverloadedStrings
     -- other-extensions:
