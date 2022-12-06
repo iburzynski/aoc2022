@@ -10,6 +10,7 @@ import Text.Megaparsec (
   , ShowErrorComponent
   )
 import Relude.Extra (dup)
+import Text.Megaparsec.Char (char)
 
 type Parser = Parsec Void Text
 type Answer = String
@@ -38,3 +39,10 @@ sumAnswers f g = both show . foldr (\x -> bimap (+ f x) (+ g x)) (0, 0)
 convertError :: (VisualStream s, TraversableStream s, ShowErrorComponent e)
   => Either (ParseErrorBundle s e) a -> Either String a
 convertError = first errorBundlePretty
+
+safeHead :: [a] -> Maybe a
+safeHead (x:_) = Just x
+safeHead [] = Nothing
+
+optSpaceP :: Parser ()
+optSpaceP = void $ optional (char ' ')
