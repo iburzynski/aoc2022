@@ -35,6 +35,7 @@ executable aoc2022
                         , megaparsec
                         , relude
                         , split
+                        , transformers
     mixins:               base hiding (Prelude)
                         , relude (Relude as Prelude)
                         , relude
