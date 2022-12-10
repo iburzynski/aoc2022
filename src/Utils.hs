@@ -11,6 +11,7 @@ import Text.Megaparsec (
   )
 import Relude.Extra (dup)
 import Text.Megaparsec.Char (char)
+import GHC.Arr (Array, array)
 
 type Parser = Parsec Void Text
 type Answer = String
@@ -46,3 +47,12 @@ safeHead [] = Nothing
 
 optSpaceP :: Parser ()
 optSpaceP = void $ optional (char ' ')
+
+applyWhen :: Bool -> (a -> a) -> a -> a
+applyWhen True f x = f x
+applyWhen _    _ x = x
+
+to2DArray :: [[a]] -> Array (Int, Int) a
+to2DArray grid@(r:_) = let h = length grid - 1; w = length r - 1 in
+  array ((0,0), (w,h)) [((x,y), v) | (y, row) <- zip [0..] grid, (x, v) <- zip [0..] row]
+to2DArray [] = array ((0, 0), (-1, -1)) []
