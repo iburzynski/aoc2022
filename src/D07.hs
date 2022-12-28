@@ -1,4 +1,4 @@
-module D07 where
+module D07 ( d07 ) where
 
 import Utils ( Answers, Parser, both, prepAnswers, safeHead )
 

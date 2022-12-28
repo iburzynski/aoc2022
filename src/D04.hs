@@ -1,4 +1,4 @@
-module D04 where
+module D04 ( d04 ) where
 
 import qualified Text.Megaparsec.Char.Lexer as L
 

@@ -9,6 +9,9 @@ import D05 ( d05 )
 import D06 ( d06 )
 import D07 ( d07 )
 import D08 ( d08 )
+import D09 ( d09 )
+import D10 ( d10 )
+import D11 ( d11 )
 
 import System.Directory (doesFileExist)
 import qualified Data.IntMap.Strict as M
@@ -25,6 +28,9 @@ solutions = M.fromList $ zip [1 ..]
   , d06
   , d07
   , d08
+  , d09
+  , d10
+  , d11
   ]
 
 runDay :: String -> IO ()

@@ -1,4 +1,4 @@
-module D02 where
+module D02 ( d02 ) where
 
 import Utils ( Parser, prepAnswers, sumAnswers )
 
@@ -13,7 +13,6 @@ data PMove = X | Y | Z
   deriving (Bounded, Enum, Eq, Read, Show)
 
 type Round = (OMove, PMove)
-type ScoreMethod = OMove -> PMove -> Int
 
 -- *** SOLUTION *** --
 d02 :: FilePath -> Text -> (String, String)

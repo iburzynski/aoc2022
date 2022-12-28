@@ -1,4 +1,4 @@
-module D01 where
+module D01 ( d01 ) where
 
 import Utils ( Parser, prepAnswers2 )
 

@@ -1,4 +1,4 @@
-module D06 where
+module D06 ( d06 ) where
 
 import Utils ( both, Answers )
 

@@ -1,4 +1,4 @@
-module D03 where
+module D03 ( d03 ) where
 
 import Utils ( convertError, both, maybeToEither, Parser )
 

@@ -1,4 +1,4 @@
-module D05 where
+module D05 ( d05 ) where
 
 import Utils ( prepAnswers2, safeHead, optSpaceP, Answers, Parser )
 
@@ -21,10 +21,7 @@ data CrateMove   = CrateMove
   , getSourceId :: StackId
   , getTargetId :: StackId
   }
-data CranePlan = CranePlan
-  { getInitialStacks :: CrateStacks
-  , getMoves         :: [CrateMove]
-  }
+data CranePlan = CranePlan CrateStacks [CrateMove]
 
 -- *** SOLUTION *** --
 d05 :: FilePath -> Text -> Answers
