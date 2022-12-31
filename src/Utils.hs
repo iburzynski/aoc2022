@@ -27,6 +27,11 @@ prepAnswers f p fp t = case runParser p fp t of
 prepAnswersS :: (a -> Answers) -> StateParser s a -> s -> FilePath -> Text -> Answers
 prepAnswersS f sp s = prepAnswers f (evalStateT sp s)
 
+testParseS :: StateParser s a -> s -> FilePath -> Text -> a
+testParseS sp s fp t = case runParser (evalStateT sp s) fp t of
+  Right x -> x
+  Left e -> error . toText $ errorBundlePretty e
+
 prepAnswers2 :: (a -> Answer) -> (a -> Answer) -> Parser a -> FilePath -> Text -> Answers
 prepAnswers2 f g = prepAnswers (bimap f g . dup)
 

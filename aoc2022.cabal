@@ -29,20 +29,25 @@ executable aoc2022
                         , D09
                         , D10
                         , D11
+                        , D12
                         , Utils
 
     default-extensions:   BangPatterns
                         , FlexibleContexts
                         , OverloadedStrings
                         , TemplateHaskell
+                        , TupleSections
                         , TypeApplications
     -- other-extensions:
     build-depends:        base ^>=4.15.1.0
+                        , array
                         , containers
                         , directory
+                        , extra
                         , lens
                         , megaparsec
                         , mtl
+                        , pqueue
                         , relude
                         , split
     mixins:               base hiding (Prelude)
