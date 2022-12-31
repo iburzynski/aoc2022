@@ -4,12 +4,13 @@ module D08 ( d08 ) where
 
 import Utils ( Answers, StateParser, both, applyWhen, toEither, fromEither, prepAnswersS )
 
-import Data.Char ( digitToInt )
-import GHC.Arr ( Array, (!), array, bounds, indices )
-import Text.Megaparsec.Char ( digitChar, newline )
+import Control.Lens ( use, (<<%=), (%=), makeLenses )
 import Control.Monad ( foldM )
+import Data.Array ( Array, (!), array, bounds, indices )
+import Data.Char ( digitToInt )
+import Relude.Extra ( dup )
+import Text.Megaparsec.Char ( digitChar, newline )
 import Text.Megaparsec ( count, eof )
-import Relude.Extra (dup)
 
 type Height       = Int
 type SightLine    = [Height]
@@ -18,9 +19,10 @@ type Forest       = Array Tree Height
 type VisibleTrees = Int
 type ScenicScore  = Int
 
-data ForestState = FState { getCurrIdx :: Tree
-                          , getCurrForest :: [(Tree, Height)]
+data ForestState = FState { _curIdx :: Tree
+                          , _curForest :: [(Tree, Height)]
                           } deriving Show
+makeLenses ''ForestState
 
 -- *** SOLUTION *** --
 d08 :: FilePath -> Text -> Answers
@@ -52,22 +54,21 @@ getSightLines forest (x, y)
 forestP :: StateParser ForestState Forest
 forestP = do
   -- parse first row to determine row length
-  (rowLength, _) <- (some heightP <* newline) >> getCurrIdx <$> get
+  (rowLength, _) <- (some heightP <* newline) >> use curIdx
   -- ensure equal number of rows and columns
   _ <- nextRow >> count (rowLength - 1) (rowP rowLength) <* eof
-  FState _ f@((uBound, _):_) <- get
-  pure $ array (dup 0, uBound) f
+  f@((ub, _):_) <- use curForest
+  pure $ array (dup 0, ub) f
 
 heightP :: StateParser ForestState ()
 heightP = do
-  t <- digitToInt <$> digitChar
-  modify (addTree t) -- update the X index
-  where addTree h (FState idx forest) = FState { getCurrIdx    = first (+ 1 ) idx
-                                               , getCurrForest = (idx, h) : forest }
+  idx <- curIdx <<%= first (+ 1) -- increment current square, returning previous value
+  h <- digitToInt <$> digitChar
+  curForest %= ((idx, h) :)
 
 rowP :: Int -> StateParser ForestState ()
 rowP n = (count n heightP <* newline) >> nextRow
--- reset X index and increment Y index to prepare for new row
 
+-- reset X index and increment Y index to prepare for new row
 nextRow :: (Monad m, MonadState ForestState m) => m ()
-nextRow = modify (\fState -> fState { getCurrIdx = bimap (const 0) (+ 1) (getCurrIdx fState)})
+nextRow = curIdx %= bimap (const 0) (+ 1)
