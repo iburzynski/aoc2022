@@ -30,6 +30,7 @@ executable aoc2022
                         , D10
                         , D11
                         , D12
+                        , D13
                         , Utils
 
     default-extensions:   BangPatterns
