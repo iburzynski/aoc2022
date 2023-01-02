@@ -31,6 +31,7 @@ executable aoc2022
                         , D11
                         , D12
                         , D13
+                        , D14
                         , Utils
 
     default-extensions:   BangPatterns
@@ -40,7 +41,7 @@ executable aoc2022
                         , TupleSections
                         , TypeApplications
     -- other-extensions:
-    build-depends:        base ^>=4.15.1.0
+    build-depends:        base ^>=4.16.1.0
                         , array
                         , containers
                         , directory
