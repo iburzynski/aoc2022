@@ -5,84 +5,75 @@ import Utils ( both, prepAnswersS, Answers, StateParser )
 import Control.Lens ( (<%~), (%=), (%~), makeLenses )
 import Control.Monad.ST ( ST, runST )
 import Data.Array.ST ( STUArray, readArray, writeArray, thaw, freeze )
-import Data.Array.Unboxed ( inRange, array, bounds, UArray )
+import Data.Array.Unboxed ( UArray, inRange, array, bounds, )
 import Data.Foldable.Extra ( findM )
-import Prelude hiding ( some )
+import Data.List ( head, tail )
+import Prelude hiding ( some, head, tail )
 import Relude.Extra ( dup )
 import Text.Megaparsec ( some )
 import Text.Megaparsec.Char ( char, newline, string )
 import qualified Data.Set as S
 import qualified Text.Megaparsec.Char.Lexer as L
 
-type Vacant = Bool
-data PState = PS {
-    _minX  :: Int
-  , _maxX  :: Int
-  , _maxY  :: Int
-  , _occupied :: Set (Int, Int) }
+type Point   = (Int, Int)
+type Vacant  = Bool
+type Settled = Int
+data PState  = PS { _minX  :: Int, _maxX  :: Int, _maxY  :: Int, _occed :: Set (Int, Int) }
 makeLenses ''PState
 
 xOrig :: Int
 xOrig = 500
 
+-- *** SOLUTION *** --
 d14 :: FilePath -> Text -> Answers
 d14 = prepAnswersS solve sigP $ PS xOrig xOrig 0 S.empty
   where solve = both (show . fall) . bimap mkArray mkArray2 . dup
 
-fall :: UArray (Int, Int) Vacant -> Int
-fall ia = runST $ go 0 (xOrig, 0) ia
+fall :: UArray Point Vacant -> Settled
+fall ia = runST $ go 0 [] (xOrig, 0) ia
   where
-    go s p@(x, y) ar = do
+    go :: Settled -> [Point] -> Point -> UArray Point Vacant -> ST s Settled
+    go stld prevs cur@(x, y) ar = do
       stA <- thaw ar :: ST s (STUArray s (Int, Int) Vacant)
-      _   <- writeArray stA p False
-      let bs = bounds ar
-          candidates = filter (inRange bs) [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
-      if length candidates < 3 then pure s else do
-        mp' <- findM (readArray stA) candidates -- get first vacant position from candidate list
-        case mp' of
-          -- settled: produce new grain at source, inc counter and start falling
-          Nothing -> do
-            ar' <- freeze stA
-            if p == (xOrig, 0) then pure (s + 1) else go (s + 1) (xOrig, 0) ar'
-          -- not settled: vacate current position and fall to new one
-          Just p' -> do
-            _   <- writeArray stA p True
-            ar' <- freeze stA
-            go s p' ar'
+      if all (inRange $ bounds ar) candidates then do
+        mNxt <- findM (readArray stA) candidates -- select the first vacant candidate point
+        maybe (settle stA) (\nxt -> freeze stA >>= go stld (cur : prevs) nxt) mNxt
+        else pure stld -- unit fell into abyss
+      where
+        candidates = [(x, y + 1), (x - 1, y + 1), (x + 1, y + 1)]
+        settle stA = do
+          ar' <- writeArray stA cur False >> freeze stA
+          if null prevs then pure (stld + 1) else go (stld + 1) (tail prevs) (head prevs) ar'
 
-mkArray, mkArray2 :: PState -> UArray (Int, Int) Vacant
+-- *** PARSER *** --
+sigP :: StateParser PState PState -- (UArray (Int, Int) Vacant)
+sigP = some (some coordsP <* newline >>= occLines) >> get
+  where
+    coordsP = do
+      x <- L.decimal <* char ','
+      y <- L.decimal <* optional (string " -> ")
+      minX %= min x >> maxX %= max x >> maxY %= max y >> pure (x, y) -- update coordinate fields
+
+-- *** HELPERS *** --
+mkArray, mkArray2 :: PState -> UArray Point Vacant
 mkArray (PS x0 x' y' o) = array ((x0, 0), (x', y')) $ map (, False) (S.toList o) ++ blanks
   where blanks = [ ((x, y), True) | x <- [x0 .. x'], y <- [0 .. y'], (x, y) `S.notMember` o ]
 -- adjust PState values for Part 2, increasing array dimensions and adding floor
-mkArray2 pS0 = mkArray $ pS3 & occupied %~ (`S.union` S.fromList [ (x, y') | x <- [x0 .. x'] ])
+mkArray2 pS0 = mkArray $ pS3 & occed %~ (`S.union` S.fromList [ (x, y') | x <- [x0 .. x'] ])
   where -- adjust maxY, minX and maxX
     (y', pS1) = pS0 & maxY <%~ (+ 2)
     (x0, pS2) = pS1 & minX <%~ min (xOrig - y')
     (x', pS3) = pS2 & maxX <%~ max (xOrig + y')
 
--- *** PARSER *** --
-sigP :: StateParser PState PState -- (UArray (Int, Int) Vacant)
-sigP = some linesP >> get
-  where
-    linesP = do
-      ls <- some (do
-        x <- L.decimal <* char ','
-        y <- L.decimal <* optional (string " -> ")
-        minX %= min x >> maxX %= max x >> maxY %= max y
-        pure (x, y)) <* newline
-      occLines ls
-
--- *** HELPERS *** --
-occLines :: MonadState PState m => [(Int, Int)] -> m ()
+occLines :: MonadState PState m => [Point] -> m ()
 occLines (p1:p2:ps) = occLine p1 p2 >> occLines (p2:ps)
 occLines _          = pure ()
 
-occLine :: MonadState PState m => (Int, Int) -> (Int, Int) -> m ()
-occLine (x1, y1) (x2, y2) = occupied %= (`S.union` S.fromList line)
+occLine :: MonadState PState m => Point -> Point -> m ()
+occLine (x1, y1) (x2, y2)
+  | x1 == x2  = addOcced $ fmap (x1, ) (mkRange y1 y2)
+  | y1 == y2  = addOcced $ fmap (, y1) (mkRange x1 x2)
+  | otherwise = pure ()
   where
-    line = case (compare x1 x2, compare y1 y2) of
-      (EQ, LT) -> (x1,)  <$> [y1 .. y2]
-      (EQ, GT) -> (x1,)  <$> [y1, y1 - 1 .. y2]
-      (LT, EQ) -> (, y1) <$> [x1 .. x2]
-      (GT, EQ) -> (, y1) <$> [x1, x1 - 1 .. x2]
-      _        -> []
+    addOcced    = (occed %=) . flip S.union . S.fromList
+    mkRange a b = if a <= b then [a .. b] else [a, a - 1 .. b]
