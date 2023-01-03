@@ -6,7 +6,7 @@ import Utils ( Answers, StateParser, both, applyWhen, toEither, fromEither, prep
 
 import Control.Lens ( use, (<<%=), (%=), makeLenses )
 import Control.Monad ( foldM )
-import Data.Array ( Array, (!), array, bounds, indices )
+import Data.Array.Unboxed ( UArray, (!), array, bounds, indices )
 import Data.Char ( digitToInt )
 import Relude.Extra ( dup )
 import Text.Megaparsec.Char ( digitChar, newline )
@@ -15,7 +15,7 @@ import Text.Megaparsec ( count, eof )
 type Height       = Int
 type SightLine    = [Height]
 type Tree         = (Int, Int)
-type Forest       = Array Tree Height
+type Forest       = UArray Tree Height
 type VisibleTrees = Int
 type ScenicScore  = Int
 

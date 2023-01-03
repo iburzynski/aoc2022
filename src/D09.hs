@@ -1,11 +1,12 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 module D09 ( d09 ) where
 
 import Utils ( both, prepAnswersS, Answers, StateParser )
 
-import Prelude hiding ( many )
 import Data.List ( iterate', (!!) )
 import Data.Sequence ( Seq(Empty, (:|>)), (|>) )
+import Prelude hiding ( many )
 import Text.Megaparsec ( choice, many )
 import Text.Megaparsec.Char ( char, hspace1, newline )
 import qualified Data.Sequence as Sq
@@ -25,12 +26,12 @@ moveN :: Direction -> Int -> RopeState -> RopeState
 moveN d n rS = iterate' (move1 d) rS !! n
 
 move1 :: Direction -> RopeState -> RopeState
-move1 d (RS r@(_ :|> t) visited) = RS r' (if t' /= t then t' : visited else visited)
+move1 d (RS r@(_ :|> t) vis) = RS r' (if t' /= t then t' : vis else vis)
   where
-    r'@(_ :|> t')    = foldl' moveKnot Empty r
-    moveKnot Empty k = Sq.singleton $ moveHead d k
+    r'@(_ :|> t')                 = foldl' moveKnot Empty r
+    moveKnot Empty k              = Sq.singleton $ moveHead d k
     moveKnot ks@(_ :|> newHead) k = ks |> moveTail newHead k
-move1 _ rS@(RS Empty _) = rS -- an empty rope doesn't change (not encountered in practice)
+move1 _ rS@(RS Empty _)      = rS -- an empty rope doesn't change (not encountered in practice)
 
 moveHead :: Direction -> Knot -> Knot
 moveHead d = case d of
@@ -43,14 +44,14 @@ moveTail :: Knot -> Knot -> Knot
 moveTail (hx, hy) t@(tx, ty)
   | (distGT1 hx tx && distGT1 hy ty) ||
     (distGT1 hx tx && distEQ1 hy ty) ||
-    (distGT1 hy ty && distEQ1 hx tx) = bimap  (+ signum (hx - tx)) (+ signum (hy - ty)) t
-  | distGT1 hx tx = first  (+ signum (hx - tx)) t
-  | distGT1 hy ty = second (+ signum (hy - ty)) t
-  | otherwise     = t
+    (distGT1 hy ty && distEQ1 hx tx)    = bimap  (+ signum (hx - tx)) (+ signum (hy - ty)) t
+  | distGT1 hx tx                       = first  (+ signum (hx - tx)) t
+  | distGT1 hy ty                       = second (+ signum (hy - ty)) t
+  | otherwise                           = t
   where
     compareDistWith1 o p1 p2 = compare (abs (p1 - p2)) 1 == o
-    distEQ1 = compareDistWith1 EQ
-    distGT1 = compareDistWith1 GT
+    distEQ1                  = compareDistWith1 EQ
+    distGT1                  = compareDistWith1 GT
 
 -- *** PARSER *** --
 movesP :: StateParser (RopeState, RopeState) (Int, Int)

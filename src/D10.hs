@@ -1,11 +1,12 @@
 module D10 ( d10 ) where
 
 import Utils ( StateParser, Answers, prepAnswersS )
+
+import Control.Lens ( use, (%=), makeLenses, (<<%=) )
+import Prelude hiding ( many )
 import Text.Megaparsec ( choice, many )
 import Text.Megaparsec.Char ( hspace, string, newline, space )
-import Prelude hiding ( many )
 import qualified Text.Megaparsec.Char.Lexer as L
-import Control.Lens ( use, (%=), makeLenses, (<<%=) )
 
 data PState = PState { _cyc :: Int, _xReg :: Int, _strength :: Int, _screen :: String }
 makeLenses ''PState

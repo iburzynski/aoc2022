@@ -3,7 +3,7 @@ module D12 ( d12 ) where
 import Utils ( prepAnswersS, StateParser, Answers, both )
 
 import Control.Lens ( (.=), (<<%=), (%=), use, makeLenses, Field2(_2), Field1(_1) )
-import Data.Array ( Array, (!), array, bounds )
+import Data.Array.Unboxed ( UArray, (!), array, bounds )
 import Data.Tuple.Extra (uncurry3)
 import Prelude hiding ( some )
 import Relude.Extra (dup)
@@ -17,7 +17,7 @@ type Dist      = Int
 type Square    = (Int, Int)
 type Start     = Square
 type End       = Square
-type HeightMap = Array Square Height
+type HeightMap = UArray Square Height
 
 data HMapState = HMState {
     _curSquare :: Square
